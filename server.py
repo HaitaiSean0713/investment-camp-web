@@ -596,7 +596,7 @@ class Handler(BaseHTTPRequestHandler):
             qr = QrCode.encode_text(value, QrCode.Ecc.MEDIUM)
             size = qr.get_size()
             cells = "".join(f"M{x+4},{y+4}h1v1h-1z" for y in range(size) for x in range(size) if qr.get_module(x,y))
-            return {"svg": f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {size+8} {size+8}" width="220" height="220" role="img" aria-label="隊伍加入 QR Code" style="background:white;border-radius:10px;padding:6px;image-rendering:pixelated"><path d="{cells}" fill="#091321"/></svg>'}
+            return {"svg": f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {size+8} {size+8}" width="220" height="220" role="img" aria-label="隊伍加入 QR Code" style="background:#091321;border-radius:10px;padding:6px;image-rendering:pixelated"><path d="{cells}" fill="#fff"/></svg>'}
         if p[0] == "team":
             sess = self.require(db, "team")
             team = one(db, "SELECT * FROM teams WHERE id=?", (sess["team_id"],))
