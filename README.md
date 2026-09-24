@@ -50,7 +50,7 @@ server.init_db()
 
 ```python
 import sys
-project_path = '/home/YOUR_USERNAME/camp-investment-platform'
+project_path = '/home/YOUR_USERNAME/investment-camp-web'
 if project_path not in sys.path:
     sys.path.insert(0, project_path)
 from wsgi import application
@@ -112,5 +112,3 @@ QR Code 由 [Project Nayuki 的 QR Code Generator](https://github.com/nayuki/QR-
 python test_integration.py
 python test_wsgi.py
 ```
-
-整合測試會自行啟動隔離的測試伺服器，驗證隊伍情報隔離、交易限制、回合價格、快照公布、最終報告、CSV/XLSX 匯入，以及同隊同時下單時不會超額買入。
