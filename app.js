@@ -36,8 +36,16 @@ const state = {
   timer: 0
 };
 
-function winBar(title='TERMINAL'){
-  return `<div class="win-header"><div class="win-controls"><span class="win-dot close"></span><span class="win-dot min"></span><span class="win-dot max"></span></div><span class="win-title">${escapeHtml(title)}</span></div>`;
+const brandLogoSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>';
+
+function brand(subtitle='NYCU IMF CAMP'){
+  return `<div class="brand"><span class="brandmark">${brandLogoSvg}</span><div class="brand-text"><span>NYCU IMF CAMP</span><small>${escapeHtml(subtitle)}</small></div></div>`;
+}
+
+function winBar(title=''){
+  if(!title) return '';
+  const clean = title.replace(/\/\/.*$/, '').trim();
+  return `<div class="card-bar"><span class="card-bar-tag">${escapeHtml(clean || title)}</span></div>`;
 }
 
 async function api(path, method='GET', body){
@@ -52,16 +60,16 @@ async function api(path, method='GET', body){
 function toast(msg, error=false){
   const el = $('#toast');
   const icon = error
-    ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff3864" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>'
-    : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00ff9d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/></svg>';
+    ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-red)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>'
+    : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/></svg>';
   el.innerHTML = `${icon}<span>${escapeHtml(msg)}</span>`;
   el.className = (error ? 'error ' : '') + 'show';
   clearTimeout(toast.t);
-  toast.t = setTimeout(() => el.className = '', 4200);
+  toast.t = setTimeout(() => el.className = '', 3800);
 }
 
 function fatal(msg){
-  app.innerHTML = `<div class="auth"><div class="card auth-card">${winBar('SYSTEM FAULT // 系統異常')}<div class="pad"><div class="brand"><span class="brandmark">↗</span><div class="brand-text"><span>Camp Invest</span><small>INVESTMENT CHALLENGE</small></div></div><h1 style="color:#ff3864;margin-top:16px">無法載入系統</h1><p>${escapeHtml(msg)}</p><button class="btn primary block" data-action="reload" style="margin-top:16px">重新開機連線</button></div></div></div>`;
+  app.innerHTML = `<div class="auth"><div class="card auth-card">${winBar('SYSTEM NOTICE')}<div class="pad">${brand('SYSTEM ERROR')}<h1 style="color:var(--accent-red);margin-top:20px">無法載入系統</h1><p>${escapeHtml(msg)}</p><button class="btn primary block" data-action="reload" style="margin-top:20px">重新整理連線</button></div></div></div>`;
 }
 
 function badge(text, kind=''){ return `<span class="badge ${kind}">${escapeHtml(text)}</span>`; }
@@ -73,7 +81,7 @@ function formData(form){ const o = {}; new FormData(form).forEach((v, k) => o[k]
 function modal(title, html, actions=''){
   let d = $('#modal');
   if(!d){ d = document.createElement('dialog'); d.id = 'modal'; document.body.append(d); }
-  d.innerHTML = `<div class="win-header"><div class="win-controls"><span class="win-dot close" data-action="close-modal" style="cursor:pointer" title="關閉"></span><span class="win-dot min"></span><span class="win-dot max"></span></div><span class="win-title">${escapeHtml(title)}</span></div><div class="modal-inner">${html}<div class="form-actions">${actions}</div></div>`;
+  d.innerHTML = `<div class="modal-header"><h3 class="modal-title">${escapeHtml(title)}</h3><button class="modal-close" data-action="close-modal" aria-label="關閉">✕</button></div><div class="modal-inner">${html}<div class="form-actions">${actions}</div></div>`;
   d.showModal();
   return d;
 }
@@ -125,7 +133,7 @@ async function loadAdmin(render=true){
 }
 
 function renderLogin(){
-  app.innerHTML = `<div class="auth"><div class="card auth-card">${winBar('LOGIN TERMINAL // 操盤手驗證')}<div class="pad"><div class="brand"><span class="brandmark">↗</span><div class="brand-text"><span>Camp Invest</span><small>ADMIN CONSOLE</small></div></div><h1 style="margin-top:16px">主持人戰情室登入</h1><p>請輸入伺服器啟動時顯示的管理員密碼，解鎖整場營隊的行情調控權限。</p><form data-form="login"><label>管理員主密碼<input type="password" name="password" required autocomplete="current-password" autofocus placeholder="••••••••••••"></label><button class="btn primary block" style="margin-top:8px">開機登入 →</button></form></div></div></div>`;
+  app.innerHTML = `<div class="auth"><div class="card auth-card">${winBar('ADMIN AUTH')}<div class="pad">${brand('ADMIN WORKSPACE')}<h1 style="margin-top:20px">管理員戰情登入</h1><p>請輸入管理員密碼，解鎖整場營隊的行情調控與資訊發布權限。</p><form data-form="login"><label>管理員主密碼<input type="password" name="password" required autocomplete="current-password" autofocus placeholder="••••••••••••"></label><button class="btn primary block" style="margin-top:12px">登入管理後台 →</button></form></div></div></div>`;
 }
 
 const adminTabs = [
@@ -142,7 +150,7 @@ const adminTabs = [
 
 function renderAdmin(){
   const a = state.dashboard;
-  app.innerHTML = `<div class="layout"><aside class="sidebar"><div class="brand"><span class="brandmark">↗</span><div class="brand-text"><span>Camp Invest</span><small>ADMIN CONSOLE</small></div></div><nav class="nav">${adminTabs.map(([id, label]) => `<button data-tab="${id}" class="${state.adminTab===id?'active':''}"><span class="nav-icon">${svgIcons[id]||''}</span><span>${label}</span></button>`).join('')}</nav><div class="sidefoot"><strong style="color:var(--text);display:block;margin-bottom:4px">模擬投資競賽平台</strong>情報不對稱 · 團隊賽局交流</div></aside><main class="main"><div class="topbar"><div><div class="eyebrow">CONTROL ROOM / HOST DASHBOARD</div><h1>${escapeHtml(adminTabs.find(x => x[0] === state.adminTab)?.[1] || '總覽戰情')}</h1></div><div class="top-actions"><select class="select-activity" id="activity-select" aria-label="選擇活動">${state.activities.length ? options(state.activities, state.aid) : '<option value="0">尚無活動</option>'}</select>${btn('＋ 新增活動', 'new-activity', 'small')}${btn('登出', 'logout', 'small ghost')}</div></div>${a ? renderAdminTab(a) : renderNoActivity()}</main></div>`;
+  app.innerHTML = `<div class="layout"><aside class="sidebar">${brand('ADMIN DASHBOARD')}<nav class="nav">${adminTabs.map(([id, label]) => `<button data-tab="${id}" class="${state.adminTab===id?'active':''}"><span class="nav-icon">${svgIcons[id]||''}</span><span>${label}</span></button>`).join('')}</nav><div class="sidefoot"><strong style="color:var(--text);display:block;margin-bottom:4px">NYCU IMF CAMP</strong>國立陽明交通大學 資財營 模擬投資平台</div></aside><main class="main"><div class="topbar"><div><div class="eyebrow">NYCU IMF CAMP · 管理員戰情室</div><h1>${escapeHtml(adminTabs.find(x => x[0] === state.adminTab)?.[1] || '總覽戰情')}</h1></div><div class="top-actions"><select class="select-activity" id="activity-select" aria-label="選擇活動">${state.activities.length ? options(state.activities, state.aid) : '<option value="0">尚無活動</option>'}</select>${btn('＋ 新增活動', 'new-activity', 'small')}${btn('登出', 'logout', 'small ghost')}</div></div>${a ? renderAdminTab(a) : renderNoActivity()}</main></div>`;
   if(a && state.adminTab === 'transactions') loadAdminTransactions();
 }
 
@@ -156,7 +164,7 @@ async function loadAdminTransactions(){
 }
 
 function renderNoActivity(){
-  return `<div class="hero">${winBar('SETUP WIZARD // 新活動引導')}<div class="eyebrow">WELCOME TO CAMP INVEST</div><h1>開啟你的第一場華爾街風雲</h1><p>設定全體起始資金、掛牌虛構企業股票、編排情報劇本，帶領全體學員體驗資訊不對稱與即時撮合的操盤快感！</p><div class="hero-actions">${btn('立即建立競賽活動 →', 'new-activity', 'primary')}</div></div>`;
+  return `<div class="hero">${winBar('GET STARTED')}<div class="eyebrow">WELCOME TO NYCU IMF CAMP</div><h1>歡迎來到 NYCU IMF 投資模擬競賽</h1><p>設定全體起始資金、掛牌企業股票、編排情報劇本，帶領全體學員體驗資訊不對稱與即時撮合的操盤快感！</p><div class="hero-actions">${btn('建立第一場投資競賽 →', 'new-activity', 'primary')}</div></div>`;
 }
 
 function renderAdminTab(a){
@@ -175,10 +183,10 @@ function renderAdminTab(a){
 
 function renderDashboard(a){
   const active = a.status === 'ACTIVE';
-  return `<section class="hero">${winBar('WAR ROOM // 主持人指揮台')}<div class="hero-num">${a.current_round || '—'}</div><div class="eyebrow">${escapeHtml(a.code)} · ${active ? 'LIVE CHALLENGE' : 'ACTIVITY CONCLUDED'}</div><h1>別人的錢最刺激：營隊戰情中心</h1><p>情報不對稱、小隊博弈、即時操盤——今天沒有大盤指數，只有你們製造的傳奇行情。</p><div class="hero-actions">${btn('開啟投影大螢幕 ↗', 'open-presenter', 'primary')} ${btn('複製整場活動', 'duplicate', 'ghost')}</div></section>
+  return `<section class="hero">${winBar('WAR ROOM')}<div class="hero-num">${a.current_round || '—'}</div><div class="eyebrow">NYCU IMF CAMP · ${escapeHtml(a.code)} · ${active ? 'LIVE CHALLENGE' : 'ACTIVITY CONCLUDED'}</div><h1>NYCU IMF CAMP 戰情中心</h1><p>情報不對稱、小隊博弈、即時操盤——今天沒有大盤指數，只有你們製造的傳奇行情。</p><div class="hero-actions">${btn('開啟投影大螢幕 ↗', 'open-presenter', 'primary')} ${btn('複製整場活動', 'duplicate', 'ghost')}</div></section>
   <section class="section"><div class="grid four"><div class="card metric">${winBar('ROUND')}<div class="label">CURRENT ROUND</div><div class="value">Round ${a.current_round || '—'}</div><div class="sub">${stageName[a.stage]}</div></div><div class="card metric">${winBar('TEAMS')}<div class="label">ACTIVE TEAMS</div><div class="value">${a.teams.length}</div><div class="sub">已建立參賽隊伍</div></div><div class="card metric">${winBar('STOCKS')}<div class="label">MARKET STOCKS</div><div class="value">${a.stocks.length}</div><div class="sub">檔標的股票流通</div></div><div class="card metric">${winBar('SNAPSHOT')}<div class="label">PUBLISHED SNAPSHOT</div><div class="value">${a.published_snapshot ? '#' + a.published_snapshot.id : '—'}</div><div class="sub">${a.published_snapshot ? time(a.published_snapshot.published_at) : '尚未公布榜單'}</div></div></div></section>
   <section class="section"><div class="section-head"><h2>現場主持推進（7 步標準節奏）</h2>${badge(a.stage==='TRADING'?'● 交易開放下單中':'○ 交易已鎖定', a.stage==='TRADING'?'green':'red')}</div><div class="card pad quick">${winBar('FLOW CONTROLLER')}<div class="btnrow" style="margin-top:14px">${btn('① 推送機密情報', 'preview-release', a.stage==='INFORMATION'?'primary':'')}${btn('② 開放情報交流', 'stage-discussion', a.stage==='DISCUSSION'?'primary':'')}${btn('③ 開放即時下單', 'stage-trading', a.stage==='TRADING'?'primary':'')}${btn('④ 結束本輪交易', 'stage-closed', a.stage==='CLOSED'?'primary':'warn')}${btn('⑤ 凍結績效快照', 'quick-snapshot', '')}${btn('⑥ 公布光榮榜單', 'go-snapshots', a.stage==='RESULT'?'primary':'')}${btn('⑦ 進入下一回合', 'next-round', '')}</div></div></section>
-  <section class="grid two section"><div class="card pad">${winBar('TIMER // 倒數計時')}<div class="section-head" style="margin-top:10px"><h2>階段計時器</h2>${badge(a.timer_mode==='AUTOMATIC'?'自動關閉':'手動控制', 'aqua')}</div><div class="value mono" data-clock style="font-size:52px;font-weight:900;letter-spacing:-0.04em;margin:12px 0;color:var(--text)">${formatClock(state.timer)}</div><div class="form-actions" style="margin-top:12px"><input id="timer-minutes" type="number" min="0" value="10" style="width:90px" aria-label="分鐘"><span class="muted tiny" style="align-self:center">分鐘</span>${btn('開始', 'timer-start', 'small primary')}${btn('暫停', 'timer-pause', 'small')}${btn('繼續', 'timer-resume', 'small')}${btn('重設', 'timer-reset', 'small')}${btn('歸零跳過', 'timer-skip', 'small ghost')}</div></div><div class="card pad">${winBar('STATUS // 狀態總結')}<div style="margin-top:10px"><h2>活動概況</h2><p class="muted" style="line-height:1.7">隊伍起始資金 <strong>${dollars(a.initial_cash)}</strong> · 累計成交 <strong>${a.transaction_count}</strong> 筆委託</p><p class="muted" style="line-height:1.7">目前處於 <strong>${stageName[a.stage]}</strong>。切換回合時，系統將自動套用下一回合固定股價並重新計算隊伍市值。</p>${a.status==='FINISHED' ? badge('活動已圓滿落幕', 'gold') : btn('查看回合走勢價格表 →', 'go-rounds', 'small') }</div></div></section>`;
+  <section class="grid two section"><div class="card pad">${winBar('TIMER')}<div class="section-head" style="margin-top:10px"><h2>階段計時器</h2>${badge(a.timer_mode==='AUTOMATIC'?'自動關閉':'手動控制', 'aqua')}</div><div class="value mono" data-clock style="font-size:52px;font-weight:800;letter-spacing:-0.03em;margin:12px 0;color:var(--text)">${formatClock(state.timer)}</div><div class="form-actions" style="margin-top:12px"><input id="timer-minutes" type="number" min="0" value="10" style="width:90px" aria-label="分鐘"><span class="muted tiny" style="align-self:center">分鐘</span>${btn('開始', 'timer-start', 'small primary')}${btn('暫停', 'timer-pause', 'small')}${btn('繼續', 'timer-resume', 'small')}${btn('重設', 'timer-reset', 'small')}${btn('歸零跳過', 'timer-skip', 'small ghost')}</div></div><div class="card pad">${winBar('STATUS')}<div style="margin-top:10px"><h2>活動概況</h2><p class="muted" style="line-height:1.7">隊伍起始資金 <strong>${dollars(a.initial_cash)}</strong> · 累計成交 <strong>${a.transaction_count}</strong> 筆委託</p><p class="muted" style="line-height:1.7">目前處於 <strong>${stageName[a.stage]}</strong>。切換回合時，系統將自動套用下一回合固定股價並重新計算隊伍市值。</p>${a.status==='FINISHED' ? badge('活動已圓滿落幕', 'gold') : btn('查看回合走勢價格表 →', 'go-rounds', 'small') }</div></div></section>`;
 }
 
 function renderSetup(a){
@@ -258,7 +266,7 @@ async function loadTeam(render=true){
 }
 
 function renderTeamEntry(){
-  app.innerHTML = `<div class="auth"><div class="card auth-card">${winBar('ACCESS KEY // 小隊登入入口')}<div class="pad"><div class="brand"><span class="brandmark">↗</span><div class="brand-text"><span>Camp Invest</span><small>TEAM TERMINAL</small></div></div><h1 style="margin-top:16px">小隊終端機連線</h1><p>請掃描主辦方提供的隊伍專屬 QR Code，或點擊隊伍邀請連結登入。</p><div class="notice" style="margin-top:20px">提示：每個加入連結與小隊綁定，請勿轉傳或分享給其他隊伍。</div></div></div></div>`;
+  app.innerHTML = `<div class="auth"><div class="card auth-card">${winBar('TEAM ACCESS')}<div class="pad">${brand('TEAM WORKSPACE')}<h1 style="margin-top:20px">小隊終端機連線</h1><p>請掃描主辦方提供的隊伍專屬 QR Code，或點選邀請連結登入。</p><div class="notice" style="margin-top:20px">提示：每個加入連結與小隊唯一綁定，請勿轉傳或分享給其他隊伍。</div></div></div></div>`;
 }
 
 const teamTabs = [
@@ -271,7 +279,7 @@ const teamTabs = [
 
 function renderTeam(){
   const a = state.team;
-  app.innerHTML = `<div class="team-shell"><div class="team-header"><div class="brand"><span class="brandmark">↗</span><div class="brand-text"><span>Camp Invest</span><small>TEAM TERMINAL</small></div></div><div class="team-id"><div>${escapeHtml(a.team.name)}</div><div class="accent mono" style="font-size:11.5px;margin-top:2px">ROUND ${a.round || '—'} · ${stageName[a.stage]}</div></div></div><nav class="team-nav">${teamTabs.map(([id, label]) => `<button data-teamtab="${id}" class="${state.teamTab===id||(state.teamTab==='stock'&&id==='market')?'active':''}">${label}</button>`).join('')}</nav><div id="team-content">${renderTeamTab(a)}</div><nav class="bottom-nav">${teamTabs.map(([id, label]) => `<button data-teamtab="${id}" class="${state.teamTab===id||(state.teamTab==='stock'&&id==='market')?'active':''}"><span class="bnav-icon">${svgIcons[id]||''}</span><span>${label}</span></button>`).join('')}</nav></div>`;
+  app.innerHTML = `<div class="team-shell"><div class="team-header">${brand('TEAM WORKSPACE')}<div class="team-id"><div>${escapeHtml(a.team.name)}</div><div class="accent mono" style="font-size:12px;margin-top:3px">ROUND ${a.round || '—'} · ${stageName[a.stage]}</div></div></div><nav class="team-nav">${teamTabs.map(([id, label]) => `<button data-teamtab="${id}" class="${state.teamTab===id||(state.teamTab==='stock'&&id==='market')?'active':''}">${label}</button>`).join('')}</nav><div id="team-content">${renderTeamTab(a)}</div><nav class="bottom-nav">${teamTabs.map(([id, label]) => `<button data-teamtab="${id}" class="${state.teamTab===id||(state.teamTab==='stock'&&id==='market')?'active':''}"><span class="bnav-icon">${svgIcons[id]||''}</span><span>${label}</span></button>`).join('')}</nav></div>`;
   if(state.teamTab === 'intelligence') renderTeamIntel();
   if(state.teamTab === 'transactions') renderTransactions().then(replaceTeamContent);
   if(state.teamTab === 'performance') renderPerformance().then(replaceTeamContent);
@@ -385,7 +393,7 @@ function renderPresenter(){
   const isDiscussion = a.stage === 'DISCUSSION';
   const isResult = a.stage === 'RESULT' || a.stage === 'FINISHED';
 
-  app.innerHTML = `<div class="presenter"><div class="presenter-head"><div class="brand"><span class="brandmark">↗</span><div class="brand-text"><span>Camp Invest</span><small>TRADING FLOOR</small></div></div><div class="eyebrow">${escapeHtml(a.code)} · ARENA COMMAND CENTER</div></div><h1>ROUND ${a.round || '—'}</h1><div class="stage"><span class="statusdot" style="${isTrading?'background:#00ff9d':isDiscussion?'background:#ffb800':'background:#b366ff'}"></span> <span>${stageName[a.stage]}</span></div><div class="clock mono" data-clock>${formatClock(state.timer)}</div><div class="presenter-body"><div class="card">${winBar('MARKET TICKER // 即時公開行情')}<div class="presenter-table" style="padding:16px 20px">${a.stocks.length ? a.stocks.map(x => `<div class="presenter-row"><span><strong>${escapeHtml(x.name)}</strong> <span class="muted tiny mono">${escapeHtml(x.symbol)}</span></span><span class="mono"><strong>${dollars(x.price)}</strong> <small class="${Number(x.change_percent)>=0?'gain':'loss'}">${x.change_percent == null ? '' : signed(x.change_percent)}</small></span></div>`).join('') : empty('市場行情準備中')}</div></div><div class="card">${winBar(isResult ? 'LEADERBOARD // 光榮排行榜' : 'PUBLIC INTELLIGENCE // 全場公開消息')}<div style="padding:16px 20px">${isResult && s ? `<div class="presenter-table">${s.entries.slice(0, 5).map((e, idx) => `<div class="presenter-row result"><span><span class="rank podium-${idx+1}">${idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '#' + e.rank}</span>${escapeHtml(e.team_name)}</span><span class="mono" style="color:var(--aqua)">${e.total_asset ? dollars(e.total_asset) : ''}</span></div>`).join('')}</div>` : a.news.length ? a.news.slice(0, 4).map(n => `<div class="item"><h3 style="margin-top:0">${escapeHtml(n.title)}</h3><p>${escapeHtml(n.content)}</p></div>`).join('') : empty('目前尚無全場公開消息')}</div></div></div><div class="presenter-foot"><span>${escapeHtml(a.name)}</span> · <span>${isTrading ? '即時下單火熱進行中' : '市場風雲瞬息萬變，請所有小隊聽從主持人指令操盤！'}</span></div></div>`;
+  app.innerHTML = `<div class="presenter"><div class="presenter-head">${brand('ARENA DISPLAY')}<div class="eyebrow">${escapeHtml(a.code)} · 大會即時看板</div></div><h1>ROUND ${a.round || '—'}</h1><div class="stage"><span class="statusdot" style="${isTrading?'background:var(--accent-green)':isDiscussion?'background:var(--accent-amber)':'background:var(--accent-purple)'}"></span> <span>${stageName[a.stage]}</span></div><div class="clock mono" data-clock>${formatClock(state.timer)}</div><div class="presenter-body"><div class="card">${winBar('MARKET TICKER')}<div class="presenter-table" style="padding:16px 20px">${a.stocks.length ? a.stocks.map(x => `<div class="presenter-row"><span><strong>${escapeHtml(x.name)}</strong> <span class="muted tiny mono">${escapeHtml(x.symbol)}</span></span><span class="mono"><strong>${dollars(x.price)}</strong> <small class="${Number(x.change_percent)>=0?'gain':'loss'}">${x.change_percent == null ? '' : signed(x.change_percent)}</small></span></div>`).join('') : empty('市場行情準備中')}</div></div><div class="card">${winBar(isResult ? 'LEADERBOARD' : 'PUBLIC INTELLIGENCE')}<div style="padding:16px 20px">${isResult && s ? `<div class="presenter-table">${s.entries.slice(0, 5).map((e, idx) => `<div class="presenter-row result"><span><span class="rank podium-${idx+1}">${idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '#' + e.rank}</span>${escapeHtml(e.team_name)}</span><span class="mono" style="color:var(--accent-blue)">${e.total_asset ? dollars(e.total_asset) : ''}</span></div>`).join('')}</div>` : a.news.length ? a.news.slice(0, 4).map(n => `<div class="item"><h3 style="margin-top:0">${escapeHtml(n.title)}</h3><p>${escapeHtml(n.content)}</p></div>`).join('') : empty('目前尚無全場公開消息')}</div></div></div><div class="presenter-foot"><span>NYCU IMF CAMP · ${escapeHtml(a.name)}</span> · <span>${isTrading ? '交易進行中' : '全場行情看板'}</span></div></div>`;
 }
 
 document.addEventListener('click', async e => {
