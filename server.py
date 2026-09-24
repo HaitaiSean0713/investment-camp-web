@@ -707,6 +707,27 @@ class Handler(BaseHTTPRequestHandler):
         rest = p[2:]
         if method == "GET" and not rest:
             return admin_dashboard(db, aid)
+        if method == "POST" and rest == ["delete"]:
+            d = self.body()
+            if d.get("code") != a["code"]:
+                raise AppError(400, "活動代碼不符，未刪除活動")
+            db.execute("BEGIN IMMEDIATE")
+            activity(db, aid)
+            db.execute("DELETE FROM sessions WHERE team_id IN (SELECT id FROM teams WHERE activity_id=?)", (aid,))
+            db.execute("DELETE FROM snapshot_entries WHERE snapshot_id IN (SELECT id FROM snapshots WHERE activity_id=?)", (aid,))
+            db.execute("DELETE FROM snapshots WHERE activity_id=?", (aid,))
+            db.execute("DELETE FROM transactions WHERE team_id IN (SELECT id FROM teams WHERE activity_id=?)", (aid,))
+            db.execute("DELETE FROM holdings WHERE team_id IN (SELECT id FROM teams WHERE activity_id=?)", (aid,))
+            db.execute("DELETE FROM news_assignments WHERE news_id IN (SELECT id FROM news WHERE activity_id=?)", (aid,))
+            db.execute("DELETE FROM news WHERE activity_id=?", (aid,))
+            db.execute("DELETE FROM prices WHERE round_id IN (SELECT id FROM rounds WHERE activity_id=?)", (aid,))
+            db.execute("DELETE FROM rounds WHERE activity_id=?", (aid,))
+            db.execute("DELETE FROM stock_fields WHERE stock_id IN (SELECT id FROM stocks WHERE activity_id=?)", (aid,))
+            db.execute("DELETE FROM stocks WHERE activity_id=?", (aid,))
+            db.execute("DELETE FROM teams WHERE activity_id=?", (aid,))
+            db.execute("DELETE FROM activities WHERE id=?", (aid,))
+            db.execute("COMMIT")
+            return {"ok": True}
         if method == "POST" and rest == ["settings"]:
             d = self.body()
             db.execute("UPDATE activities SET name=?,performance_report_visible=?,review_visible=?,timer_mode=? WHERE id=?",
