@@ -4,6 +4,8 @@ import io
 import os
 import sys
 import socket
+import sqlite3
+from contextlib import closing
 import time
 import subprocess
 import atexit
@@ -187,4 +189,17 @@ with ThreadPoolExecutor(max_workers=2) as pool:
     results=list(pool.map(try_buy,[c1,c2]))
 assert sorted(results)==[200,409],results
 assert c1.call('/api/team/me')['portfolio']['cash']=='0.00'
+Client().call(base+'/delete', {'code':code}, 401)
+admin.call(base+'/delete', {'code':'WRONG-CODE'}, 400)
+assert admin.call(base)['code']==code
+admin.call(base+'/delete', {'code':code})
+admin.call(base, status=404)
+Client().call('/api/public/'+code, status=404)
+team1.call('/api/team/me', status=401)
+assert admin.call(b2)['id']==aid2
+with closing(sqlite3.connect(env['CAMP_DB'])) as db:
+    assert db.execute('PRAGMA foreign_key_check').fetchall()==[]
+    assert db.execute('SELECT COUNT(*) FROM activities WHERE id=?',(aid,)).fetchone()[0]==0
+    assert db.execute('SELECT COUNT(*) FROM teams WHERE id IN (?,?)',(t1['id'],t2['id'])).fetchone()[0]==0
+    assert db.execute('SELECT COUNT(*) FROM stocks WHERE id=?',(s1,)).fetchone()[0]==0
 print('SMOKE TEST PASSED', aid, sid, final)
